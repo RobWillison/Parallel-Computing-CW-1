@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
-int size = 400;
+int size = 10;
+int *locks;
 
 double **get_matrix(int width, int height)
 {
@@ -29,30 +31,51 @@ void printArray(double **matrix)
   }
 }
 
-double relax(double **read, double **write)
+double relax_row(double **read, double **write, int row)
 {
   double maxDiffrence = 0.0;
-  int x, y;
+  int x;
   for (x = 1; x < size - 1; x++)
   {
-    for (y = 1; y < size - 1; y++)
-    {
-
-      double temp = read[x + 1][y];
-      temp = temp + read[x - 1][y];
-      temp = temp + read[x][y + 1];
-      temp = temp + read[x][y - 1];
+      double temp = read[x + 1][row];
+      temp = temp + read[x - 1][row];
+      temp = temp + read[x][row + 1];
+      temp = temp + read[x][row - 1];
       temp = temp / 4;
 
-      double diffrence = write[x][y] - temp;
+      double diffrence = write[x][row] - temp;
       if (diffrence < 0)
       {
         diffrence = diffrence * -1.0;
       }
       if (maxDiffrence < diffrence) maxDiffrence = diffrence;
 
-      write[x][y] = temp;
-    }
+      write[x][row] = temp;
+  }
+
+  return maxDiffrence;
+}
+
+double relax(void *arguments)
+{
+  struct arg_struct *args = (struct arg_struct *)args;
+  double **read = (double**)args->read;
+  double **write = (double**)args->write;
+  int x;
+  double maxDiffrence = 0.0;
+  for (x = 1; x < size - 1; x++)
+  {
+    //Check if row is locked
+    if (locks[x - 1] || locks[x] || locks[x + 1]) continue;
+
+    locks[x] = 1;
+    locks[x - 1] = 1;
+    locks[x + 1] = 1;
+    double diffrence = relax_row(read, write, x);
+    locks[x] = 0;
+    locks[x - 1] = 0;
+    locks[x + 1] = 0;
+    if (diffrence > maxDiffrence) maxDiffrence = diffrence;
   }
 
   return maxDiffrence;
@@ -62,6 +85,8 @@ int main()
 {
   double **readMatrix = get_matrix(size, size);
   double **writeMatrix = get_matrix(size, size);
+  locks = calloc(size, sizeof(int));
+
   int x;
   //fill sides
   for (x = 0; x < size; x++)
@@ -80,9 +105,20 @@ int main()
     writeMatrix[size - 1][x] = 1.0;
   }
   double diffrence = 1.0;
+
   while (diffrence > 0.01)
   {
-    diffrence = relax(readMatrix, writeMatrix);
+    pthread_t thread1;
+    pthread_t thread2;
+
+    struct arguments args;
+    args.read = readMatrix;
+    args.write = writeMatrix;
+
+    if(pthread_create(&thread1, NULL, relax, &readMatrix, (void *)&args)) return 1;
+    pthread_join(thread1, NULL);
+    diffrence = 0.0;
+    //diffrence = relax(readMatrix, writeMatrix);
     double **temp = readMatrix;
     readMatrix = writeMatrix;
     writeMatrix = temp;
