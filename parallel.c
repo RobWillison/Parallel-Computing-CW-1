@@ -1,9 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <string.h>
+#include <time.h>
 
-int size = 10;
+//NOTES
+//check if diffrence is smaller that percision in each thread then just return whether it was smaller
+//to avoid having to find the largest double in a massive array
+
+int size = 1000;
+int number_of_threads = 40;
 int *locks;
+int *done;
+double precision = 0.01;
+pthread_t *threads;
+
+double **readMatrix;
+double **writeMatrix;
 
 double **get_matrix(int width, int height)
 {
@@ -33,7 +46,7 @@ void printArray(double **matrix)
 
 double relax_row(double **read, double **write, int row)
 {
-  double maxDiffrence = 0.0;
+  double max_diffrence = 0.0;
   int x;
   for (x = 1; x < size - 1; x++)
   {
@@ -48,45 +61,60 @@ double relax_row(double **read, double **write, int row)
       {
         diffrence = diffrence * -1.0;
       }
-      if (maxDiffrence < diffrence) maxDiffrence = diffrence;
+      if (max_diffrence < diffrence) max_diffrence = diffrence;
 
       write[x][row] = temp;
   }
 
-  return maxDiffrence;
+  return max_diffrence;
 }
 
-double relax(void *arguments)
+void *relax()
 {
-  struct arg_struct *args = (struct arg_struct *)args;
-  double **read = (double**)args->read;
-  double **write = (double**)args->write;
-  int x;
-  double maxDiffrence = 0.0;
-  for (x = 1; x < size - 1; x++)
-  {
-    //Check if row is locked
-    if (locks[x - 1] || locks[x] || locks[x + 1]) continue;
 
-    locks[x] = 1;
-    locks[x - 1] = 1;
-    locks[x + 1] = 1;
-    double diffrence = relax_row(read, write, x);
-    locks[x] = 0;
-    locks[x - 1] = 0;
-    locks[x + 1] = 0;
-    if (diffrence > maxDiffrence) maxDiffrence = diffrence;
+  int x;
+  double max_diffrence = 0.0;
+  int rowsleft = 1;
+  while (rowsleft) {
+    rowsleft = 0;
+    for (x = 1; x < size - 1; x++)
+    {
+      //Check if row is locked
+      if (locks[x - 1] || locks[x] || locks[x + 1] || done[x]) continue;
+      rowsleft = 1;
+
+      locks[x] = 1;
+      locks[x - 1] = 1;
+      locks[x + 1] = 1;
+
+      double diffrence = relax_row(readMatrix, writeMatrix, x);
+
+      done[x] = 1;
+      locks[x] = 0;
+      locks[x - 1] = 0;
+      locks[x + 1] = 0;
+
+      if (diffrence > max_diffrence) max_diffrence = diffrence;
+    }
   }
 
-  return maxDiffrence;
+  if (max_diffrence > precision)
+  {
+    return (void*)1;
+  }
+
+  return (void*)0;
 }
 
 int main()
 {
-  double **readMatrix = get_matrix(size, size);
-  double **writeMatrix = get_matrix(size, size);
-  locks = calloc(size, sizeof(int));
+  clock_t start = clock();
+  readMatrix = get_matrix(size, size);
+  writeMatrix = get_matrix(size, size);
 
+  locks = calloc(size, sizeof(int));
+  done = calloc(size, sizeof(int));
+  threads = malloc(sizeof(pthread_t) * number_of_threads);
   int x;
   //fill sides
   for (x = 0; x < size; x++)
@@ -104,27 +132,39 @@ int main()
     writeMatrix[0][x] = 1.0;
     writeMatrix[size - 1][x] = 1.0;
   }
-  double diffrence = 1.0;
+  int cont = 1;
 
-  while (diffrence > 0.01)
+  while (cont)
   {
-    pthread_t thread1;
-    pthread_t thread2;
+    cont = 0;
 
-    struct arguments args;
-    args.read = readMatrix;
-    args.write = writeMatrix;
+    int thread;
+    for (thread = 0; thread <= number_of_threads; thread++)
+    {
+      pthread_t newThread;
+      if(pthread_create(&newThread, NULL, relax, NULL)) return 1;
+      threads[thread] = newThread;
+    }
 
-    if(pthread_create(&thread1, NULL, relax, &readMatrix, (void *)&args)) return 1;
-    pthread_join(thread1, NULL);
-    diffrence = 0.0;
-    //diffrence = relax(readMatrix, writeMatrix);
+    for (thread = 0; thread <= number_of_threads; thread++)
+    {
+      void *result;
+      pthread_join(threads[thread], &result);
+      if (result) cont = 1;
+    }
+
+
+
+
     double **temp = readMatrix;
     readMatrix = writeMatrix;
     writeMatrix = temp;
+    memset(done, 0, sizeof(int) * size);
   }
 
-  printArray(writeMatrix);
-
+  //printArray(readMatrix);
+  clock_t end = clock();
+  double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+  printf("TIME USED %f\n", cpu_time_used);
   return 0;
 }
