@@ -8,12 +8,15 @@
 //check if diffrence is smaller that percision in each thread then just return whether it was smaller
 //to avoid having to find the largest double in a massive array
 
-int size = 1000;
-int number_of_threads = 40;
-int *locks;
-int *done;
+int size = 100;
+int number_of_threads = 8;
+int currentRow = 1;
+int cont = 1;
 double precision = 0.01;
+
 pthread_t *threads;
+pthread_barrier_t barrier;
+pthread_mutex_t rowLock;
 
 double **readMatrix;
 double **writeMatrix;
@@ -69,52 +72,56 @@ double relax_row(double **read, double **write, int row)
   return max_diffrence;
 }
 
-void *relax()
+int getNextRow()
 {
+  int next = -1;
+  pthread_mutex_lock(&rowLock);
 
-  int x;
-  double max_diffrence = 0.0;
-  int rowsleft = 1;
-  while (rowsleft) {
-    rowsleft = 0;
-    for (x = 1; x < size - 1; x++)
-    {
-      //Check if row is locked
-      if (locks[x - 1] || locks[x] || locks[x + 1] || done[x]) continue;
-      rowsleft = 1;
-
-      locks[x] = 1;
-      locks[x - 1] = 1;
-      locks[x + 1] = 1;
-
-      double diffrence = relax_row(readMatrix, writeMatrix, x);
-
-      done[x] = 1;
-      locks[x] = 0;
-      locks[x - 1] = 0;
-      locks[x + 1] = 0;
-
-      if (diffrence > max_diffrence) max_diffrence = diffrence;
-    }
-  }
-
-  if (max_diffrence > precision)
+  if (currentRow <= size - 2)
   {
-    return (void*)1;
+    next = currentRow++;
   }
+  pthread_mutex_unlock(&rowLock);
 
-  return (void*)0;
+  return next;
 }
 
-int main()
+void doSerialWork()
 {
-  clock_t start = clock();
+  double **temp = readMatrix;
+  readMatrix = writeMatrix;
+  writeMatrix = temp;
+
+  cont = 0;
+  currentRow = 1;
+}
+
+void *relax()
+{
+  while(cont)
+  {
+    int row = getNextRow();
+    if (row == -1)
+    {
+      int returnValue = pthread_barrier_wait(&barrier);
+      if (returnValue == PTHREAD_BARRIER_SERIAL_THREAD)
+      {
+        doSerialWork();
+      }
+      pthread_barrier_wait(&barrier);
+    }
+
+    double diff = relax_row(readMatrix, writeMatrix, row);
+
+    if (diff > precision) cont = 1;
+  }
+}
+
+void setup_matrix()
+{
   readMatrix = get_matrix(size, size);
   writeMatrix = get_matrix(size, size);
 
-  locks = calloc(size, sizeof(int));
-  done = calloc(size, sizeof(int));
-  threads = malloc(sizeof(pthread_t) * number_of_threads);
   int x;
   //fill sides
   for (x = 0; x < size; x++)
@@ -132,34 +139,27 @@ int main()
     writeMatrix[0][x] = 1.0;
     writeMatrix[size - 1][x] = 1.0;
   }
-  int cont = 1;
+}
 
-  while (cont)
+int main()
+{
+  clock_t start = clock();
+  setup_matrix();
+  pthread_barrier_init(&barrier, NULL, number_of_threads);
+  pthread_mutex_init(&rowLock, NULL);
+
+  threads = malloc(sizeof(pthread_t) * number_of_threads);
+  int thread;
+  for (thread = 0; thread <= number_of_threads; thread++)
   {
-    cont = 0;
+    pthread_t newThread;
+    if(pthread_create(&newThread, NULL, relax, NULL)) return 1;
+    threads[thread] = newThread;
+  }
 
-    int thread;
-    for (thread = 0; thread <= number_of_threads; thread++)
-    {
-      pthread_t newThread;
-      if(pthread_create(&newThread, NULL, relax, NULL)) return 1;
-      threads[thread] = newThread;
-    }
-
-    for (thread = 0; thread <= number_of_threads; thread++)
-    {
-      void *result;
-      pthread_join(threads[thread], &result);
-      if (result) cont = 1;
-    }
-
-
-
-
-    double **temp = readMatrix;
-    readMatrix = writeMatrix;
-    writeMatrix = temp;
-    memset(done, 0, sizeof(int) * size);
+  for (thread = 0; thread <= number_of_threads; thread++)
+  {
+    pthread_join(threads[thread], NULL);
   }
 
   //printArray(readMatrix);
