@@ -8,15 +8,14 @@
 //check if diffrence is smaller that percision in each thread then just return whether it was smaller
 //to avoid having to find the largest double in a massive array
 
-int size = 100;
-int number_of_threads = 8;
-int currentRow = 1;
+int size = 10;
+int number_of_threads = 4;
+
 int cont = 1;
 double precision = 0.01;
 
 pthread_t *threads;
 pthread_barrier_t barrier;
-pthread_mutex_t rowLock;
 
 double **readMatrix;
 double **writeMatrix;
@@ -72,20 +71,6 @@ double relax_row(double **read, double **write, int row)
   return max_diffrence;
 }
 
-int getNextRow()
-{
-  int next = -1;
-  pthread_mutex_lock(&rowLock);
-
-  if (currentRow <= size - 2)
-  {
-    next = currentRow++;
-  }
-  pthread_mutex_unlock(&rowLock);
-
-  return next;
-}
-
 void doSerialWork()
 {
   double **temp = readMatrix;
@@ -93,25 +78,34 @@ void doSerialWork()
   writeMatrix = temp;
 
   cont = 0;
-  currentRow = 1;
 }
 
-void *relax()
+void *relax(int *rowNumber)
 {
-  while(cont)
+  int currentRow = *rowNumber;
+  while(1)
   {
-    int row = getNextRow();
-    if (row == -1)
+    if (currentRow > size - 2)
     {
+      currentRow = *rowNumber;
       int returnValue = pthread_barrier_wait(&barrier);
+
+      if (!cont) {
+        return;
+      };
+
+      pthread_barrier_wait(&barrier);
+
       if (returnValue == PTHREAD_BARRIER_SERIAL_THREAD)
       {
         doSerialWork();
       }
+
       pthread_barrier_wait(&barrier);
     }
 
-    double diff = relax_row(readMatrix, writeMatrix, row);
+    double diff = relax_row(readMatrix, writeMatrix, currentRow);
+    currentRow = currentRow + number_of_threads;
 
     if (diff > precision) cont = 1;
   }
@@ -146,14 +140,15 @@ int main()
   clock_t start = clock();
   setup_matrix();
   pthread_barrier_init(&barrier, NULL, number_of_threads);
-  pthread_mutex_init(&rowLock, NULL);
 
   threads = malloc(sizeof(pthread_t) * number_of_threads);
   int thread;
-  for (thread = 0; thread <= number_of_threads; thread++)
+  for (thread = 1; thread < number_of_threads + 1; thread++)
   {
     pthread_t newThread;
-    if(pthread_create(&newThread, NULL, relax, NULL)) return 1;
+    int *threadNumber = (int*)malloc(sizeof(int));
+    *threadNumber = thread;
+    if(pthread_create(&newThread, NULL, (void *(*) (void*))relax, (void*)threadNumber)) return 1;
     threads[thread] = newThread;
   }
 
@@ -162,7 +157,7 @@ int main()
     pthread_join(threads[thread], NULL);
   }
 
-  //printArray(readMatrix);
+  printArray(readMatrix);
   clock_t end = clock();
   double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
   printf("TIME USED %f\n", cpu_time_used);
