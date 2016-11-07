@@ -2,17 +2,14 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 
-//NOTES
-//check if diffrence is smaller that percision in each thread then just return whether it was smaller
-//to avoid having to find the largest double in a massive array
 
-int size = 100;
+int size = 1000;
 int number_of_threads = 1;
 
 int cont = 1;
-double precision = 0.01;
+double precision = 0.001;
 
 pthread_t *threads;
 pthread_barrier_t barrier;
@@ -46,29 +43,30 @@ void printArray(double **matrix)
   }
 }
 
-double relax_row(double **read, double **write, int row)
+int relax_row(int row)
 {
   double max_diffrence = 0.0;
   int x;
+  int cont = 0;
   for (x = 1; x < size - 1; x++)
   {
-      double temp = read[x + 1][row];
-      temp = temp + read[x - 1][row];
-      temp = temp + read[x][row + 1];
-      temp = temp + read[x][row - 1];
+      double temp = readMatrix[row][x + 1];
+      temp = temp + readMatrix[row][x - 1];
+      temp = temp + readMatrix[row + 1][x];
+      temp = temp + readMatrix[row - 1][x];
       temp = temp / 4;
 
-      double diffrence = write[x][row] - temp;
+      double diffrence = writeMatrix[row][x] - temp;
       if (diffrence < 0)
       {
         diffrence = diffrence * -1.0;
       }
-      if (max_diffrence < diffrence) max_diffrence = diffrence;
+      if (precision < diffrence) cont = 1;
 
-      write[x][row] = temp;
+      writeMatrix[row][x] = temp;
   }
 
-  return max_diffrence;
+  return cont;
 }
 
 void doSerialWork()
@@ -104,11 +102,11 @@ void *relax(int *rowNumber)
       pthread_barrier_wait(&barrier);
     }
 
-    double diff = relax_row(readMatrix, writeMatrix, currentRow);
+    cont = relax_row(currentRow);
     currentRow = currentRow + number_of_threads;
-
-    if (diff > precision) cont = 1;
   }
+
+  return NULL;
 }
 
 void setup_matrix()
@@ -137,7 +135,8 @@ void setup_matrix()
 
 int main()
 {
-  clock_t start = clock();
+  struct timeval startTime, endTime;
+  gettimeofday(&startTime, NULL);
   setup_matrix();
   pthread_barrier_init(&barrier, NULL, number_of_threads);
 
@@ -152,14 +151,14 @@ int main()
     threads[thread] = newThread;
   }
 
-  for (thread = 0; thread <= number_of_threads; thread++)
+  for (thread = 1; thread < number_of_threads + 1; thread++)
   {
     pthread_join(threads[thread], NULL);
   }
 
   //printArray(readMatrix);
-  clock_t end = clock();
-  double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+  gettimeofday(&endTime, NULL);
+  double cpu_time_used = (endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec) / 1000000.0);
   printf("TIME USED %f\n", cpu_time_used);
   return 0;
 }
