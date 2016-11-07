@@ -8,8 +8,8 @@
 //check if diffrence is smaller that percision in each thread then just return whether it was smaller
 //to avoid having to find the largest double in a massive array
 
-int size = 10;
-int number_of_threads = 4;
+int size = 100;
+int number_of_threads = 1;
 
 int cont = 1;
 double precision = 0.01;
@@ -91,7 +91,7 @@ void *relax(int *rowNumber)
       int returnValue = pthread_barrier_wait(&barrier);
 
       if (!cont) {
-        return;
+        return NULL;
       };
 
       pthread_barrier_wait(&barrier);
@@ -157,7 +157,7 @@ int main()
     pthread_join(threads[thread], NULL);
   }
 
-  printArray(readMatrix);
+  //printArray(readMatrix);
   clock_t end = clock();
   double cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
   printf("TIME USED %f\n", cpu_time_used);
