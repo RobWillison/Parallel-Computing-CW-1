@@ -4,20 +4,26 @@
 #include <string.h>
 #include <sys/time.h>
 
-
-int size = 1000;
-int number_of_threads = 1;
-
+//The size of the grid
+int size = 10;
+int numberOfThreads = 4;
+//A boolean 1/0 to tell the threads to continue or not
 int cont = 1;
-double precision = 0.001;
+//The precision to work to
+double precision = 0.01;
 
-pthread_t *threads;
 pthread_barrier_t barrier;
-
+//A matrix to write to and read from
 double **readMatrix;
 double **writeMatrix;
-
-double **get_matrix(int width, int height)
+/**
+* getMatrix
+* width : the number of cells accross the matrix needs to be
+* height : the number of cells down the matrix needs to be
+*
+* returns a double ** contatining a zeroed matrix width x height
+**/
+double **getMatrix(int width, int height)
 {
   double** matrix;
 
@@ -30,7 +36,12 @@ double **get_matrix(int width, int height)
 
   return matrix;
 }
-
+/**
+* printArray
+* matrix : the matrix to print
+*
+* returns void
+**/
 void printArray(double **matrix)
 {
   int x;
@@ -42,77 +53,106 @@ void printArray(double **matrix)
     printf("\n");
   }
 }
-
-int relax_row(int row)
+/**
+* relaxRow
+* row : the intager relating to the index of the row in the matrix
+*       to perform relaxation on
+*
+* returns 1 or 0 depending on whether all cells met the precision
+**/
+int relaxRow(int row)
 {
-  double max_diffrence = 0.0;
+  //a double to keep track of the largest diffrence
+  double maxDiffrence = 0.0;
   int x;
   int cont = 0;
+  //Loop through all cells in the row
   for (x = 1; x < size - 1; x++)
   {
+      //calculate the average of all 4 neighbours
       double temp = readMatrix[row][x + 1];
       temp = temp + readMatrix[row][x - 1];
       temp = temp + readMatrix[row + 1][x];
       temp = temp + readMatrix[row - 1][x];
       temp = temp / 4;
-
-      double diffrence = writeMatrix[row][x] - temp;
+      //write the answer into the writeMatrix
+      writeMatrix[row][x] = temp;
+      //quick check if cont allready set then
+      //don't bother checking precision for this cell
+      if (cont) continue;
+      //Work out the diffrence betoween new and old values
+      double diffrence = readMatrix[row][x] - temp;
+      //Check if the diffrence is bigger than the current max
       if (diffrence < 0)
       {
         diffrence = diffrence * -1.0;
       }
+      //If the precision is larger than the diffrence set cont to true
       if (precision < diffrence) cont = 1;
-
-      writeMatrix[row][x] = temp;
   }
 
   return cont;
 }
-
+/**
+* doSerialWork
+*
+* does the work required to be done in serial when using multiple threads
+*
+**/
 void doSerialWork()
 {
+  //swap the read and write matrixs over
   double **temp = readMatrix;
   readMatrix = writeMatrix;
   writeMatrix = temp;
-
+  //set continue back to 0
   cont = 0;
 }
-
+/**
+* relax
+* rowNumber : the row to start applying relaxation too
+**/
 void *relax(int *rowNumber)
 {
   int currentRow = *rowNumber;
   while(1)
   {
+    //Check if the currentRow is a valid row
     if (currentRow > size - 2)
     {
+      //If not reset the current row to the starting row
       currentRow = *rowNumber;
-      int returnValue = pthread_barrier_wait(&barrier);
-
+      pthread_barrier_wait(&barrier);
+      //If cont = 0 all threads return
       if (!cont) {
         return NULL;
       };
-
-      pthread_barrier_wait(&barrier);
-
+      //wait for threads the release one is designated the serial thread
+      int returnValue = pthread_barrier_wait(&barrier);
+      //One thread does the doSerialWork()
       if (returnValue == PTHREAD_BARRIER_SERIAL_THREAD)
       {
         doSerialWork();
       }
-
+      //wait for all to colplete the release for another interation
       pthread_barrier_wait(&barrier);
     }
-
-    cont = relax_row(currentRow);
-    currentRow = currentRow + number_of_threads;
+    //relax the currentRow
+    cont = relaxRow(currentRow);
+    //Get next row to do
+    currentRow = currentRow + numberOfThreads;
   }
-
+  //shouldn't get here
   return NULL;
 }
-
-void setup_matrix()
+/**
+* setupMatrix
+* sets the read and write global matrixs with the boundary values
+**/
+void setupMatrix()
 {
-  readMatrix = get_matrix(size, size);
-  writeMatrix = get_matrix(size, size);
+  readMatrix = getMatrix(size, size);
+  writeMatrix = getMatrix(size, size);
 
   int x;
   //fill sides
@@ -135,30 +175,36 @@ void setup_matrix()
 
 int main()
 {
+  //Setup timing stuff
   struct timeval startTime, endTime;
   gettimeofday(&startTime, NULL);
-  setup_matrix();
-  pthread_barrier_init(&barrier, NULL, number_of_threads);
 
-  threads = malloc(sizeof(pthread_t) * number_of_threads);
+  setupMatrix();
+
+  pthread_barrier_init(&barrier, NULL, numberOfThreads);
+  //allocate array to store threads in
+  pthread_t *threads = malloc(sizeof(pthread_t) * numberOfThreads);
+  //create the threads
   int thread;
-  for (thread = 1; thread < number_of_threads + 1; thread++)
+  for (thread = 1; thread < numberOfThreads + 1; thread++)
   {
     pthread_t newThread;
     int *threadNumber = (int*)malloc(sizeof(int));
+    //give each thread there index, also the row to start on
     *threadNumber = thread;
     if(pthread_create(&newThread, NULL, (void *(*) (void*))relax, (void*)threadNumber)) return 1;
     threads[thread] = newThread;
   }
-
-  for (thread = 1; thread < number_of_threads + 1; thread++)
+  //wait for all the threads to return
+  for (thread = 1; thread < numberOfThreads + 1; thread++)
   {
     pthread_join(threads[thread], NULL);
   }
-
-  //printArray(readMatrix);
+  //print matrix, debug only
+  printArray(readMatrix);
+  //work out the time taken and print
   gettimeofday(&endTime, NULL);
-  double cpu_time_used = (endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec) / 1000000.0);
-  printf("TIME USED %f\n", cpu_time_used);
+  double cpuTimeUsed = (endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec) / 1000000.0);
+  printf("TIME USED %f\n", cpuTimeUsed);
   return 0;
 }
