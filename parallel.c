@@ -6,7 +6,7 @@
 
 //The size of the grid
 int size = 10;
-int numberOfThreads = 4;
+int numberOfThreads = 1;
 //A boolean 1/0 to tell the threads to continue or not
 int cont = 1;
 //The precision to work to
@@ -107,6 +107,8 @@ void doSerialWork()
   writeMatrix = temp;
   //set continue back to 0
   cont = 0;
+  printf("NEXT ITERATION\n");
+  printArray(readMatrix);
 }
 /**
 * relax
@@ -201,6 +203,7 @@ int main()
     pthread_join(threads[thread], NULL);
   }
   //print matrix, debug only
+  printf("FINAL\n");
   printArray(readMatrix);
   //work out the time taken and print
   gettimeofday(&endTime, NULL);
