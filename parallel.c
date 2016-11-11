@@ -138,7 +138,7 @@ void *relax(int *rowNumber)
       pthread_barrier_wait(&barrier);
     }
     //relax the currentRow
-    cont = relaxRow(currentRow);
+    if (relaxRow(currentRow)) cont = 1;
     //Get next row to do
     currentRow = currentRow + numberOfThreads;
   }

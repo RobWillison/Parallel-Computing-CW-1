@@ -8,7 +8,42 @@
 
 \maketitle
 
-\section{Introduction}
-Here is the text of your introduction.
+\section{Parralisation Technique}
+In order to parallelise the problem I decided to spilt the matrix up into rows
+then give each thread a number of these rows. More specifically each thread is
+given a starting row, which is applies relaxation too, then adds the number of
+threads to the starting row to get the next row to compute on. So if 4 threads
+are used on a 14, the two end rows are fixed and don't require relaxation,
+row matrix the rows are split up like so:
+
+\begin{center}
+\begin{tabular}{ |c|c|c|c|c|c|c|c|c|c|c|c|c|c|c| }
+ \hline
+ rowNumber & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 \\
+ thread &  & 1 & 2 & 3 & 4 & 1 & 2 & 3 & 4 & 1 & 2 & 3 & 4 &  \\
+ \hline
+\end{tabular}
+\end{center}
+
+The threads are then all syncronised using a barrier so after all rows have been
+computed the read and write matrixs are swapped and the computation continues.\\~\\
+A quick note is that the program will actual use the number of thread plus the
+main thread, it was decided not to change this as the main thread just will be
+desheduled while it waits for all the other threads to return so won't effect
+the investigation significantly.
+
+\section{Avoiding Race Conditions}
+There are a few places where race conditions are possible:
+
+\begin{enumerate}
+\item Firstly two matrixs are used, one to read from and then one to write to.
+This avoids threads trying to write and read to the same cell simultaniously,
+similtanious reads are possible but not a problem. Also if one matrix was used without
+a lock the program would yeild diffrent results each time depending on if a cell
+was computed before of after its neighbours are.
+\item Once a thread has finished it sets a global variable ``cont" to 1 if the
+precision was not met. this variable does not need a lock as if one thread resets
+it after it doesn't matter as its still 1.
+\end{enumerate}
 
 \end{document}
