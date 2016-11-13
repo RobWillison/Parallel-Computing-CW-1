@@ -1,6 +1,10 @@
 \documentclass{article}
-\usepackage{graphicx}
 
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{colortbl}
 \begin{document}
 
 \title{CM30225 Parallel Computing \\ Assessed Courseork Assignment 1}
@@ -44,6 +48,12 @@ was computed before of after its neighbours are.
 \item Once a thread has finished it sets a global variable ``cont" to 1 if the
 precision was not met. this variable does not need a lock as if one thread resets
 it after it doesn't matter as its still 1.
+\item After all threads have finished they check if the continue value is 0 and if
+so return. this is preceded by a pthread\_barrier\_wait (line 128) to make sure all threads have
+finished relaxation.
+\item The swapping of the matrix's and resetting the continue back to 0 needs to be
+done by a single thread after all threads have finished relaxing. therefore before a
+pthread\_barrier\_wait appears before and after this serial code (lines 135 and 142).
 \end{enumerate}
 
 \section{Correctness Testing}
@@ -99,5 +109,58 @@ were checked for equality. Once this was done for 4x4, 8x8, 10x10 and 20x20 with
 2, 4, 8 and 16 threads it was conculded that the program was correctly calculating
 the relaxation of a matrix to a given precision with any number of threads.
 
+\section{Scalability Investigation}
+
+\pgfplotstabletypeset[
+  columns/threads/.style={column name=Threads},
+  columns/time/.style={column name=Time (S)},
+  columns/speedup/.style={column name=Speedup},
+]{1000x1000}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Threads},
+    ylabel=Speedup,
+    ]
+  \addplot table [x=threads,y=speedup] {1000x1000};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\pgfplotstabletypeset[
+  columns/threads/.style={column name=Threads},
+  columns/time/.style={column name=Time (S)},
+]{5000x5000}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Threads},
+    ylabel=Time (S),
+    ]
+  \addplot table [x=threads,y=time] {5000x5000};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\pgfplotstabletypeset[
+  columns/threads/.style={column name=Threads},
+  columns/time/.style={column name=Time (S)},
+]{10000x10000}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Threads},
+    ylabel=Time (S),
+    ]
+  \addplot table [x=threads,y=time] {10000x10000};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
 
 \end{document}

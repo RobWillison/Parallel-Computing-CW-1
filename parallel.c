@@ -214,8 +214,8 @@ int main(int argc, char **argv)
     pthread_join(threads[thread], NULL);
   }
   //print matrix, debug only
-  printf("FINAL ITERATIONS %d\n", iterations);
-  printArray(readMatrix);
+  printf("FINAL THREADS %d\n", numberOfThreads);
+  //printArray(readMatrix);
   //work out the time taken and print
   gettimeofday(&endTime, NULL);
   double cpuTimeUsed = (endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec) / 1000000.0);
