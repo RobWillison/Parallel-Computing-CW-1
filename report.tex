@@ -47,6 +47,57 @@ it after it doesn't matter as its still 1.
 \end{enumerate}
 
 \section{Correctness Testing}
-In order to test the program is correctly computing the answer 
+In order to test the program is correctly computing the answer the problem was split
+into three seperate sections which can be tested seperatly. Firstly the relaxation,
+in order to test this the first three iterations of a 5 x 5 matrix bounded by all 1's
+where hand calculated then compared to the output from my program running with one
+thread. For example in the first iteration you would expect 0.5 at the corners (1 + 1 + 0 + 0 / 4)
+, 0.25 on the edges (1 + 0 + 0 + 0 / 4) and zero in the middle. As you can see below the program outputs the correct
+value.
+
+\begin{center}
+\begin{tabular}{ c c c c c }
+ 1 & 1 & 1 & 1 & 1 \\
+ 1 & 0.5 & 0.25 & 0.5 & 1 \\
+ 1 & 0.25 & 0.0 & 0.25 & 1 \\
+ 1 & 0.5 & 0.25 & 0.5 & 1 \\
+ 1 & 1 & 1 & 1 & 1 \\
+\end{tabular}
+\end{center}
+
+This was continued for the next two iterations, after this it was concluded that
+the program can correctly calculate each relaxation iteration.\\
+The second step to the correctness testing is that the relaxation stops when a given
+precision has been reached. To test this a precision is picked, 0.01 for example,
+then two 3 x 3 matrix was then chosen with bounding values 0.011 and 0.01 when relaxation
+is performed the first matrix should iterate twice and the second only once as the precision
+is imediatly met.\\
+Below are two tables showing the two runs on the program, firstly with 0.011 bounding
+and secondly with 0.01.
+
+\begin{center}
+\begin{tabular}{ c c c c }
+iteration & diffrence & precision & continue \\
+ 1 & 0.011 & 0.01 & 1\\
+ 2 & 0.0 & 0.01 & 0\\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ c c c c }
+iteration & diffrence & precision & continue \\
+ 1 & 0.01 & 0.01 & 0\\
+\end{tabular}
+\end{center}
+
+This was tried with precisions 0.1, 0.01, 0.001 and according bounding values and
+then it was concluded that the relaxation correctly stops when the precision is met.\\~\\
+
+The Final thing to test is that all of the above still holds for multiple threads,
+to check this various number of threads were run using the same matrix size and the results
+were checked for equality. Once this was done for 4x4, 8x8, 10x10 and 20x20 with
+2, 4, 8 and 16 threads it was conculded that the program was correctly calculating
+the relaxation of a matrix to a given precision with any number of threads.
+
 
 \end{document}
