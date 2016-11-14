@@ -130,12 +130,13 @@ void *relax(int *rowNumber)
       if (!cont) {
         return NULL;
       };
-      iterations++;
+
       //wait for threads the release one is designated the serial thread
       int returnValue = pthread_barrier_wait(&barrier);
       //One thread does the doSerialWork()
       if (returnValue == PTHREAD_BARRIER_SERIAL_THREAD)
       {
+        iterations++;
         doSerialWork();
       }
       //wait for all to colplete the release for another interation
@@ -214,7 +215,7 @@ int main(int argc, char **argv)
     pthread_join(threads[thread], NULL);
   }
   //print matrix, debug only
-  printf("FINAL THREADS %d\n", numberOfThreads);
+  printf("FINAL THREADS %d\n", iterations);
   //printArray(readMatrix);
   //work out the time taken and print
   gettimeofday(&endTime, NULL);

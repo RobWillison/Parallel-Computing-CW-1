@@ -207,4 +207,30 @@ of threads between 1 and 16. The results of this are given below.\\~\\
 ]{10000x10000}
 \end{center}
 
+As you can see from the results the speedup on P processors is very close to the
+number of processors until and trails of after 14 processors is reached. This is
+shown more easily by the graph below.\\
+
+\begin{figure}[h!]
+ \centering
+ \begin{tikzpicture}
+ \begin{axis}[
+     xlabel={Threads},
+     ylabel=Speedup,
+     ]
+   \addplot table [x=threads,y=speedup] {10000x10000};
+ \end{axis}
+ \end{tikzpicture}
+ \end{figure}\\~\\
+
+ \subsubsection{Amdahl’s Law}
+ One of the reasons for the tail of in speedup could be that it is approaching
+ Amdahl's Limit. Amdahls' Law states that there is a limit on speedup because
+ some part of the program must be done in serial. The serial part of this program
+ is the swapping of matrixs and the resetting of the the continue variable.\\
+ The theoretical Amdahl Limit was calculated by running the serial code 10,000
+ times and getting the average length of time (0.00000472 seconds) the number of
+ iterations performed on a 10000 by 10000 matrix with a precision of 0.01 is 37
+ this gives the serail portion of the computation a time of 0.00017 Seconds.  
+
 \end{document}
