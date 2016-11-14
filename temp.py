@@ -4,7 +4,7 @@ first = True
 core1 = 0
 results = []
 f = open('myfile','w')
-with open("10000x10000", "r") as my_file:
+with open("50x50", "r") as my_file:
     for lines in my_file:
         if first:
             first = False
