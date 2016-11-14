@@ -5,6 +5,9 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{colortbl}
+\usepackage{amsmath}
+
+\usepackage{listings}
 \begin{document}
 
 \title{CM30225 Parallel Computing \\ Assessed Courseork Assignment 1}
@@ -12,8 +15,20 @@
 
 \maketitle
 
+\section{Approach}
+The relaxation problem involves repetadly replacing each cell in a matrix with the
+average of its four neighbours until a given precision is reached. Firstly to solve
+the probelm using a serial approach each cell is processed row by row. After each
+cell has its value replaced the diffrence between the previous and new value is
+calculated and checked to see if it is less than the precision value. When every
+cell is replaced by a number smaller than the precision the computation stops.\\~\\
+In order to store the matrix two double**'s are created one to record the result of
+the last iteration and one to store all the new values in, after each iteration the
+pointers for the two matrix's are swapped.
+
+
 \section{Parralisation Technique}
-In order to parallelise the problem I decided to spilt the matrix up into rows
+In order to parallelise the problem it was decided to spilt the matrix up into rows
 then give each thread a number of these rows. More specifically each thread is
 given a starting row, which is applies relaxation too, then adds the number of
 threads to the starting row to get the next row to compute on. So if 4 threads
@@ -29,33 +44,99 @@ row matrix the rows are split up like so:
 \end{tabular}
 \end{center}
 
-The threads are then all syncronised using a barrier so after all rows have been
-computed the read and write matrixs are swapped and the computation continues.\\~\\
+This splits the rows evenly between the given number of threads. If the number of
+number of threads is more than the size of the matrix then the number of threads
+is reset to the size of the matrix.\\~\\
+Each thread is allowed to run at its own speed while it computes the relaxation
+for its set of rows. The threads are then all syncronised using a barrier before
+they can move on to the next iteration. After all rows have been computed the
+read and write matrixs must be swapped this is a serial operation so only one
+thread performs is while the rest wait. To make sure only one thread performs this
+the C function pthread\_barrier\_wait returns the value PTHREAD\_BARRIER\_SERIAL\_THREAD
+to one thread, the thread that gets given this is the one which will perform the
+serial step.The pseudocode below shows how this is implemented.\\~\\
+
+\begin{lstlisting}
+while(precision_not_met)
+{
+  doRelaxation();
+
+  serial = barrier_wait();
+
+  if (serial == PTHREAD_BARRIER_SERIAL_THREAD)
+  {
+    doSerialWork();
+  }
+
+  barrier_wait();
+}
+\end{lstlisting}
+
+
 A quick note is that the program will actual use the number of thread plus the
 main thread, it was decided not to change this as the main thread just will be
-desheduled while it waits for all the other threads to return so won't effect
+de-scheduled while it waits for all the other threads to return so won't effect
 the investigation significantly.
 
+Finally to check if the precision has been made a global variable is used by all
+threads to show whether the program should continue. This global value is set to
+0 before each iteration then if any of the threads do not meet the precision they
+set it to 1. This means that if by the end of the iteration the value is 1 then
+the computation needs to continue.
+
+\newpage
 \section{Avoiding Race Conditions}
 There are a few places where race conditions are possible:
 
 \begin{enumerate}
-\item Firstly two matrixs are used, one to read from and then one to write to.
-This avoids threads trying to write and read to the same cell simultaniously,
-similtanious reads are possible but not a problem. Also if one matrix was used without
-a lock the program would yeild diffrent results each time depending on if a cell
-was computed before of after its neighbours are.
+\item While thinking about this problem there were two options firstly to read and write
+to the same matrix as this would probebly tend towards the same answer. However
+as multiple threads could be trying to read and write to the same cell at once the
+program could yeild diffrent results each time unless the matrix was protected by a lock, which would add
+overhead.
+Therefore two matrixs are used are so one can be used to read from
+and then one to write to. This avoids threads trying to write and read to the same cell simultaniously,
+similtanious reads are possible and not a problem.\\
 \item Once a thread has finished it sets a global variable ``cont" to 1 if the
 precision was not met. this variable does not need a lock as if one thread resets
 it after it doesn't matter as its still 1.
 \item After all threads have finished they check if the continue value is 0 and if
-so return. this is preceded by a pthread\_barrier\_wait (line 128) to make sure all threads have
-finished relaxation.
+so return. As each thread can update this value then all threads must have finished
+the iteration before any one can check this value, so a barrier is required before.
+Also as the next step is to set the value to 0 and continue the next iteration a barrier
+is required after the check as well to make sure that all threads have checked the value
+before reseting it.
 \item The swapping of the matrix's and resetting the continue back to 0 needs to be
 done by a single thread after all threads have finished relaxing. therefore before a
 pthread\_barrier\_wait appears before and after this serial code (lines 135 and 142).
 \end{enumerate}
 
+With this in mind the pseudocode will actually look like this.\\
+
+\begin{lstlisting}
+while(true)
+{
+  doRelaxation();
+
+  barrier_wait();
+  if (precision_met)
+  {
+    return;
+  }
+
+  serial = barrier_wait();
+
+  if (serial == PTHREAD_BARRIER_SERIAL_THREAD)
+  {
+    swapMatrixs();
+    precision_met = 0;
+  }
+
+  barrier_wait();
+}
+\end{lstlisting}
+
+\newpage
 \section{Correctness Testing}
 In order to test the program is correctly computing the answer the problem was split
 into three seperate sections which can be tested seperatly. Firstly the relaxation,
@@ -110,57 +191,20 @@ were checked for equality. Once this was done for 4x4, 8x8, 10x10 and 20x20 with
 the relaxation of a matrix to a given precision with any number of threads.
 
 \section{Scalability Investigation}
-
+\subsection{Speedup}
+Speed up is given as the speed taken to preform a computation on one processor
+divided by the speed on P processors.\\~\\
+\begin{center}
+S_p = \frac{Time\ on\ 1\ processor}{Time\ on\ p\ processors}\\~\\
+\end{center}
+Given this the speedup was calculated for a 10000 by 10000 matrix for all number
+of threads between 1 and 16. The results of this are given below.\\~\\
+\begin{center}
 \pgfplotstabletypeset[
   columns/threads/.style={column name=Threads},
   columns/time/.style={column name=Time (S)},
-  columns/speedup/.style={column name=Speedup},
-]{1000x1000}
-
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    xlabel={Threads},
-    ylabel=Speedup,
-    ]
-  \addplot table [x=threads,y=speedup] {1000x1000};
-\end{axis}
-\end{tikzpicture}
-\end{figure}
-
-\pgfplotstabletypeset[
-  columns/threads/.style={column name=Threads},
-  columns/time/.style={column name=Time (S)},
-]{5000x5000}
-
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    xlabel={Threads},
-    ylabel=Time (S),
-    ]
-  \addplot table [x=threads,y=time] {5000x5000};
-\end{axis}
-\end{tikzpicture}
-\end{figure}
-
-\pgfplotstabletypeset[
-  columns/threads/.style={column name=Threads},
-  columns/time/.style={column name=Time (S)},
+  columns/speedup/.style={column name=Speedup on P processors},
 ]{10000x10000}
-
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    xlabel={Threads},
-    ylabel=Time (S),
-    ]
-  \addplot table [x=threads,y=time] {10000x10000};
-\end{axis}
-\end{tikzpicture}
-\end{figure}
+\end{center}
 
 \end{document}
