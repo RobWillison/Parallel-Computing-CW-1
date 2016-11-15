@@ -294,6 +294,78 @@ differing sizes of matrix, these results are shown in Figure \ref{fig:gustafson}
 \end{figure}\\~\\
 
 These results show that, as Gustafson suggests, as the problem size is increased
-the speedup on P processors tends towards the number of processors. 
+the speedup on P processors tends towards the number of processors.
+
+\subsubsection{Efficiency}
+
+Efficiency, speed up per processor is given by the following equation.\\~\\
+
+\begin{center}
+$E\ =\ \frac{time\ on\ 1\ processor}{p\ \times\ time\ on\ P\ processors}$
+\end{center}
+
+\begin{figure}[H]
+ \centering
+ \begin{tikzpicture}
+ \begin{axis}[
+     xlabel={Threads},
+     ylabel=Efficiency,
+     ]
+   \addplot table [x=cores,y=efficiency] {Efficiency/100x100};
+   \addplot table [x=cores,y=efficiency] {Efficiency/1000x1000};
+   \addplot table [x=cores,y=efficiency] {Efficiency/10000x10000};
+   \addlegendentry{100 x 100}
+   \addlegendentry{1000 x 1000}
+   \addlegendentry{10000 x 10000}
+ \end{axis}
+ \end{tikzpicture}
+ \caption{0.01 precision}
+ \label{fig:efficiency}
+\end{figure}\\~\\
+
+As shown in Figure \ref{fig:efficiency} as more threads are added the efficiency
+drops, this is expected as the more threads there are the more processor time is
+spent waiting for other threads. How fast the efficiency drops is dependant on
+the problem size. Using a small problem 100 x 100 the efficiency drops very quickly
+as the percentage part of the problem which can be done in parrellel is smaller
+so the threads spend a larger portion of time waiting for the serial part to complete, larger
+problem sizes drop off slower.
+
+\subsubsection{Karp-Flatt}
+
+The Karp-Flatt metric was calculated for three of the matrix sizes to see how the
+diffrence in problem size and number of threads effects the metric. Figure \ref{fig:karpflatt}
+shows the results from this investigation.
+
+\begin{figure}[H]
+ \centering
+ \begin{tikzpicture}
+ \begin{axis}[
+     xlabel={Threads},
+     ylabel=KarpFlatt,
+     ]
+   \addplot table [x=cores,y=karpflatt] {KarpFlatt/100x100};
+   \addplot table [x=cores,y=karpflatt] {KarpFlatt/1000x1000};
+   \addplot table [x=cores,y=karpflatt] {KarpFlatt/10000x10000};
+   \addlegendentry{100 x 100}
+   \addlegendentry{1000 x 1000}
+   \addlegendentry{10000 x 10000}
+ \end{axis}
+ \end{tikzpicture}
+ \caption{0.01 precision}
+ \label{fig:karpflatt}
+\end{figure}\\~\\
+
+As shown by the figure for large problem sizes the Karp-Flatt metric stays roughly
+the same as you add threads and is very close to 0. This is expected as the speedup on
+a number of processors is very close to the number of processors, this was shown
+earlier. However when the problem size is small the Karp-Flatt metric gets larger
+as more processors are added, this is because the Karp-Flatt metris is a measure of
+the sequential part of the problem and with small problems there is, propotionall,
+more sequential part as threads spend longer waiting on each other.
+
+\subsubsection{Isoefficiency}
+
+
 
 \end{document}

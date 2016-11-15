@@ -3,8 +3,10 @@
 first = True
 core1 = 0
 results = []
-f = open('myfile','w')
-with open("50x50", "r") as my_file:
+string = "50x50"
+f = open('KarpFlatt/' + string,'w')
+f.write('cores time karpflatt\n')
+with open(string, "r") as my_file:
     for lines in my_file:
         if first:
             first = False
@@ -15,9 +17,12 @@ with open("50x50", "r") as my_file:
 
         if int(numbers[0]) == 1:
             core1 = float(numbers[1])
+            continue
 
-        numbers.append(core1 / float(numbers[1]))
+        top = ((1 / float(numbers[2])) - (1 / float(numbers[0])))
+        bottom = 1 - (1 / float(numbers[0]))
+        numbers.append(top / bottom)
 
-        f.write(str(numbers[0]) + ' ' + str(numbers[1]) + ' ' + str(numbers[2]) + '\n')
+        f.write(str(numbers[0]) + ' ' + str(numbers[1]) + ' ' + str(numbers[3]) + '\n')
 
 f.close()
