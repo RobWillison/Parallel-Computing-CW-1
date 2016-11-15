@@ -6,6 +6,7 @@
 \usepackage{array}
 \usepackage{colortbl}
 \usepackage{amsmath}
+\usepackage{float}
 
 \usepackage{listings}
 \begin{document}
@@ -211,7 +212,7 @@ As you can see from the results the speedup on P processors is very close to the
 number of processors until and trails of after 14 processors is reached. This is
 shown more easily by Figure \ref{fig:speedup}.\\
 
-\begin{figure}[h!]
+\begin{figure}[H]
  \centering
  \begin{tikzpicture}
  \begin{axis}[
@@ -234,8 +235,11 @@ shown more easily by Figure \ref{fig:speedup}.\\
  times and getting the average length of time (0.00000472 seconds) the number of
  iterations performed on a 10000 by 10000 matrix with a precision of 0.01 is 37
  this gives the serial portion of the computation a time of 0.00017 Seconds.\\
- This is the theoretical Amdahl limit in practice there is extra overhead such
- as the barrier waits which will make this limit practically impossible to get near.
+ In theory this limit would be accesable with an infinate number of processors
+ however there are extra overheads which are not taken into account, such as waiting
+ on barriers and also createing and destroying the threads. These overheads will also
+ increase as more threads are added causing the calculated Amdahl to be impossible to
+ get near to with the current program structure.
 
 \subsubsection{Slowdown}
 
@@ -244,7 +248,7 @@ sized arrays, around less than 100 by 100, there was slowdown instead of speedup
 This is shown by Figure \ref{fig:slowdown} which was using a 100 by 100 matrix and 0.01
 precision.
 
-\begin{figure}[h!]
+\begin{figure}[H]
  \centering
  \begin{tikzpicture}
  \begin{axis}[
@@ -259,24 +263,37 @@ precision.
 \end{figure}\\~\\
 
 As you can see from the graph initially adding more processors does speed the
-computation up as you would expect. However after 5 processes adding more causes
-slowdown as the overhead of creating more thread outweighs the extra computing
-power which is accessible.
+computation up as you would expect. However after 5 processes are added any more causes
+slowdown as the overhead of creating the extra thread outweighs the extra computing
+power gained.
 
 \subsubsection{Gustafson’s Law}
 
-\begin{figure}[h!]
+Gustafson's law suggests that if the problem size is increased the percentage of time
+spent of the sequential part of a program will decrease, therefore giving a better
+speed up value. To try and show this in terms of the speedup was calculated for
+differing sizes of matrix, these results are shown in Figure \ref{fig:gustafson}.
+
+\begin{figure}[H]
  \centering
  \begin{tikzpicture}
  \begin{axis}[
      xlabel={Array Size},
      ylabel=Speedup,
      ]
-   \addplot table [x=arraysize,y=speedup] {gustafson};
+   \addplot table [x=arraysize,y=speedup] {gustafson16};
+   \addplot table [x=arraysize,y=speedup] {gustafson8};
+   \addplot table [x=arraysize,y=speedup] {gustafson4};
+   \addlegendentry{16 Cores}
+   \addlegendentry{8 Cores}
+   \addlegendentry{4 Cores}
  \end{axis}
  \end{tikzpicture}
- \caption{16 Cores, 0.01 precision}
+ \caption{0.01 precision}
  \label{fig:gustafson}
 \end{figure}\\~\\
+
+These results show that, as Gustafson suggests, as the problem size is increased
+the speedup on P processors tends towards the number of processors. 
 
 \end{document}

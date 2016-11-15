@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.7.14)  14 NOV 2016 16:33
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2016.7.14)  15 NOV 2016 13:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -534,25 +534,33 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 567.
 LaTeX Info: Redefining \[ on input line 2665.
 LaTeX Info: Redefining \] on input line 2666.
 )
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count133
+\float@exts=\toks38
+\float@box=\box41
+\@float@everytoks=\toks39
+\@floatcapt=\box42
+)
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
-\lst@mode=\count133
-\lst@gtempboxa=\box41
-\lst@token=\toks38
-\lst@length=\count134
+\lst@mode=\count134
+\lst@gtempboxa=\box43
+\lst@token=\toks40
+\lst@length=\count135
 \lst@currlwidth=\dimen187
-\lst@column=\count135
-\lst@pos=\count136
+\lst@column=\count136
+\lst@pos=\count137
 \lst@lostspace=\dimen188
 \lst@width=\dimen189
-\lst@newlines=\count137
-\lst@lineno=\count138
+\lst@newlines=\count138
+\lst@lineno=\count139
 \lst@maxwidth=\dimen190
 
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2013/08/26 1.5b (Carsten Heinz)
-\c@lstnumber=\count139
-\lst@skipnumbers=\count140
-\lst@framebox=\box42
+\c@lstnumber=\count140
+\lst@skipnumbers=\count141
+\lst@framebox=\box44
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
 File: listings.cfg 2013/08/26 1.5b listings configuration
@@ -561,32 +569,32 @@ Package: listings 2013/08/26 1.5b (Carsten Heinz)
  (./report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
 ABD: EveryShipout initializing macros
 (/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count141
+\scratchcounter=\count142
 \scratchdimen=\dimen191
-\scratchbox=\box43
-\nofMPsegments=\count142
-\nofMParguments=\count143
-\everyMPshowfont=\toks39
-\MPscratchCnt=\count144
+\scratchbox=\box45
+\nofMPsegments=\count143
+\nofMParguments=\count144
+\everyMPshowfont=\toks41
+\MPscratchCnt=\count145
 \MPscratchDim=\dimen192
-\MPnumerator=\count145
-\makeMPintoPDFobject=\count146
-\everyMPtoPDFconversion=\toks40
+\MPnumerator=\count146
+\makeMPintoPDFobject=\count147
+\everyMPtoPDFconversion=\toks42
 ) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
 Package: pdftexcmds 2011/11/29 v0.20 Utility functions of pdfTeX for LuaTeX (HO
 )
@@ -639,66 +647,66 @@ e
 Package pgfplots Warning: running in backwards compatibility mode (unsuitable t
 ick labels; missing features). Consider writing \pgfplotsset{compat=1.9} into y
 our preamble.
- on input line 11.
+ on input line 12.
 
-\c@lstlisting=\count147
+\c@lstlisting=\count148
 
-Underfull \hbox (badness 10000) in paragraph at lines 19--28
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 47--58
+Underfull \hbox (badness 10000) in paragraph at lines 20--29
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 47--58
+Underfull \hbox (badness 10000) in paragraph at lines 48--59
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 47--58
+Underfull \hbox (badness 10000) in paragraph at lines 48--59
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 48--59
 
  []
 
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 61.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 62.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 61.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 62.
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 92--100
+Underfull \hbox (badness 10000) in paragraph at lines 93--101
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 114--115
+Underfull \hbox (badness 10000) in paragraph at lines 115--116
 
  []
 
 [3] [4]
-Underfull \hbox (badness 10000) in paragraph at lines 184--186
+Underfull \hbox (badness 10000) in paragraph at lines 185--187
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 184--186
+Underfull \hbox (badness 10000) in paragraph at lines 185--187
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 195--197
+Underfull \hbox (badness 10000) in paragraph at lines 196--198
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 195--197
+Underfull \hbox (badness 10000) in paragraph at lines 196--198
 
  []
 
@@ -706,7 +714,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 195--197
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.198 S_
+l.199 S_
         p = \frac{Time\ on\ 1\ processor}{Time\ on\ p\ processors}\\~\\
 ? 
 
@@ -716,47 +724,44 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.198 ... 1\ processor}{Time\ on\ p\ processors}\\
+l.199 ... 1\ processor}{Time\ on\ p\ processors}\\
                                                   ~\\
 ? 
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.198 ... 1\ processor}{Time\ on\ p\ processors}\\
+l.199 ... 1\ processor}{Time\ on\ p\ processors}\\
                                                   ~\\
 ? 
 ! Missing } inserted.
 <inserted text> 
                 }
-l.198 ... 1\ processor}{Time\ on\ p\ processors}\\
+l.199 ... 1\ processor}{Time\ on\ p\ processors}\\
                                                   ~\\
 ? 
 ! Extra }, or forgotten \endgroup.
 \par ...m \@noitemerr {\@@par }\fi \else {\@@par }
                                                   \fi 
-l.198 ... 1\ processor}{Time\ on\ p\ processors}\\
+l.199 ... 1\ processor}{Time\ on\ p\ processors}\\
                                                   ~\\
 ? 
 
-Underfull \hbox (badness 10000) in paragraph at lines 200--202
+Underfull \hbox (badness 10000) in paragraph at lines 201--203
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 200--202
-
- []
-
-PGFPlots: reading {10000x10000}
-
-Underfull \hbox (badness 10000) in paragraph at lines 210--213
+Underfull \hbox (badness 10000) in paragraph at lines 201--203
 
  []
 
 PGFPlots: reading {10000x10000}
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+Underfull \hbox (badness 10000) in paragraph at lines 211--214
 
+ []
+
+PGFPlots: reading {10000x10000}
 
 ! LaTeX Error: There's no line here to end.
 
@@ -764,45 +769,39 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.226  \end{figure}\\~
+l.227  \end{figure}\\~
                       \\
 ? 
-
-Underfull \hbox (badness 10000) in paragraph at lines 226--227
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 227--228
 
  []
 
 Missing character: There is no â in font cmbx10!
 Missing character: There is no € in font cmbx10!
 Missing character: There is no ™ in font cmbx10!
-[6]
 PGFPlots: reading {100x100}
 
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
 ! LaTeX Error: There's no line here to end.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.259 \end{figure}\\~
+l.263 \end{figure}\\~
                      \\
 ? 
-
-Underfull \hbox (badness 10000) in paragraph at lines 259--260
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 263--264
 
  []
 
 Missing character: There is no â in font cmbx10!
 Missing character: There is no € in font cmbx10!
 Missing character: There is no ™ in font cmbx10!
-PGFPlots: reading {gustafson}
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
+PGFPlots: reading {gustafson16}
+PGFPlots: reading {gustafson8}
+PGFPlots: reading {gustafson4}
 
 ! LaTeX Error: There's no line here to end.
 
@@ -810,41 +809,37 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.280 \end{figure}\\~
+l.294 \end{figure}\\~
                      \\
 ? 
-
-Underfull \hbox (badness 10000) in paragraph at lines 280--281
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 294--295
 
  []
 
-[7] [8] (./report.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
- ) 
+[9] (./report.aux) ) 
 Here is how much of TeX's memory you used:
- 20007 strings out of 495028
- 478385 string characters out of 6181497
- 605382 words of memory out of 5000000
- 22828 multiletter control sequences out of 15000+600000
+ 20089 strings out of 495028
+ 479569 string characters out of 6181497
+ 602706 words of memory out of 5000000
+ 22904 multiletter control sequences out of 15000+600000
  9023 words of font info for 33 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 63i,11n,94p,728b,1750s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
-/cm/cmsy7.pfb>
-Output written on report.pdf (8 pages, 127200 bytes).
+ 63i,19n,94p,728b,2053s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmb
+x12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pf
+b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr
+/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive
+/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmsy7.pfb>
+Output written on report.pdf (9 pages, 129359 bytes).
 PDF statistics:
- 74 PDF objects out of 1000 (max. 8388607)
- 53 compressed objects within 1 object stream
+ 77 PDF objects out of 1000 (max. 8388607)
+ 55 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
