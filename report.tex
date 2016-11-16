@@ -33,8 +33,8 @@ In order to parallelise the problem it was decided to spilt the matrix up into r
 then give each thread a number of these rows. More specifically each thread is
 given a starting row, which is applies relaxation too, then adds the number of
 threads to the starting row to get the next row to compute on. So if 4 threads
-are used on a 14, the two end rows are fixed and don't require relaxation,
-row matrix the rows are split up like so:
+are used on a 14 row matrix, the two end rows are fixed and don't require relaxation,
+the rows are split up like so:
 
 \begin{center}
 \begin{tabular}{ |c|c|c|c|c|c|c|c|c|c|c|c|c|c|c| }
@@ -109,7 +109,7 @@ is required after the check as well to make sure that all threads have checked t
 before reseting it.
 \item The swapping of the matrix's and resetting the continue back to 0 needs to be
 done by a single thread after all threads have finished relaxing. therefore before a
-pthread\_barrier\_wait appears before and after this serial code (lines 135 and 142).
+pthread\_barrier\_wait appears before and after this serial code (lines 135 and 142 in the C program).
 \end{enumerate}
 
 With this in mind the pseudocode will actually look like this.\\
@@ -193,7 +193,7 @@ the relaxation of a matrix to a given precision with any number of threads.
 
 \section{Scalability Investigation}
 \subsection{Speedup}
-Speed up is given as the speed taken to preform a computation on one processor
+Speedup is given as the speed taken to preform a computation on one processor
 divided by the speed on P processors.\\~\\
 \begin{center}
 S_p = \frac{Time\ on\ 1\ processor}{Time\ on\ p\ processors}\\~\\
@@ -227,11 +227,11 @@ shown more easily by Figure \ref{fig:speedup}.\\
  \end{figure}\\~\\
 
  \subsubsection{Amdahl’s Law}
- One of the reasons for the tail of in speedup could be that it is approaching
+ One of the reasons for the tail off in speedup could be that it is approaching
  Amdahl's Limit. Amdahls' Law states that there is a limit on speedup because
  some part of the program must be done in serial. The serial part of this program
  is the swapping of matrixs and the resetting of the the continue variable.\\
- The theoretical Amdahl Limit was calculated by running the serial code 10,000
+ The theoretical Amdahl Limit was calculated by running the serial part of the code 10,000
  times and getting the average length of time (0.00000472 seconds) the number of
  iterations performed on a 10000 by 10000 matrix with a precision of 0.01 is 37
  this gives the serial portion of the computation a time of 0.00017 Seconds.\\
@@ -364,8 +364,141 @@ as more processors are added, this is because the Karp-Flatt metris is a measure
 the sequential part of the problem and with small problems there is, propotionall,
 more sequential part as threads spend longer waiting on each other.
 
-\subsubsection{Isoefficiency}
+\subsection{Parrellel Overhead}
 
+In order to evaluate the work efficiency of the solution the overhead was calculated
+using this formula. This gives the total parrallel overhead in seconds of all threads.
+This was calculated for a selection of problem sizes to see how this effected the overhead using diffrenct cores.
+To make the data more obvious the Overhead per thread was calculated, the overheaddivided by the number of threads,
+this is what is shown in Figure \ref{fig:overhead}
+and Figure \ref{fig:overhead2}.
+
+\begin{center}
+$Overhead\ =\ p\ \times\ time\ on\ P\ processors\ -\ time\ on\ 1\ processor}$
+\end{center}
+
+\begin{figure}[H]
+\begin{minipage}{.5\textwidth}
+ \centering
+ \resizebox{.9\textwidth}{.9\textwidth}{
+  \begin{tikzpicture}
+  \begin{axis}[
+     xlabel={Threads},
+     ylabel=Overhead (S),
+     ]
+   \addplot table [x=cores,y=overhead] {Overhead/5000x5000};
+   \addplot table [x=cores,y=overhead] {Overhead/10000x10000};
+   \addlegendentry{5000 x 5000}
+   \addlegendentry{10000 x 10000}
+  \end{axis}
+  \end{tikzpicture}
+ }
+ \caption{0.01 precision}
+ \label{fig:overhead}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+\centering
+ \resizebox{.9\textwidth}{.9\textwidth}{
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={Threads},
+    ylabel=Overhead (S),
+    ]
+  \addplot table [x=cores,y=overhead] {Overhead/500x500};
+  \addplot table [x=cores,y=overhead] {Overhead/1000x1000};
+  \addlegendentry{500 x 500}
+  \addlegendentry{1000 x 1000}
+\end{axis}
+\end{tikzpicture}
+}
+\caption{0.01 precision}
+\label{fig:overhead2}
+\end{minipage}
+\end{figure}\\~\\
+
+This data shows that as you add more threads the total overhead will increase. This is
+not a supprise as adding more threads requires more time to be spent creating and destroying
+the pthreads and also waiting on barriers will have a longer overhead as there are
+more threads to wait for.
+
+\subsection{Isoefficiency}
+
+To work out how the program scales the Isoefficiency was calculated. The Isoefficiency
+is the relationship between the number of threads and the size of the problem where the
+efficiency stays the same. So how much larger does the problem have to be to keep the
+efficiency the same for a given increase in the number of threads.\\
+In order to analyse the isoefficiency we need an equation for the sequential time
+and parrelle time. An equation to give the sequential time is as follows where
+n is the size of the matrix, a is some overhead inncured in checking the precision
+after each iteration and b is the overhead in setting up the calculation.
+
+\begin{center}
+$T_{seq}\ =n^2\ +\ na\ + b$
+\end{center}
+
+The parrellel time equation is similar to the sequntial one but the $n^2$ part is done
+in parrallel, there is also an overhead c in setting up each thread. So the equation
+is as follows. where p is the number of threads.
+
+\begin{center}
+$T_{par}\ =\frac{n^2}{p}\ +\ pc\ + na + b$
+\end{center}
+
+And the parrellel over is therefore give by this equation.
+
+\begin{center}
+$T_{o}\ =p^2c\ +\ (p\ -\ 1)(na\ +\ b)$
+\end{center}
+
+So subbing these two equations into $T_{seq}\ =\ C(T_{par})$ and simplifying gives
+us.
+
+$n^2\ +\ na\ +\ b\ +\ naC\ +bC = p^2cC\ +\ pnaC\ +\ pb$
+
+The by setting the constants to a set value and trying diffrent values for the
+matrix size and calculating p we can see that the relationship between the problem
+size and the number of threads is linear. To try and get a better idea of how this
+theoretical calculation relates to the actual program the efficency was calculated
+for a number of problem sizes, then an efficency was picked and the number of cores
+needed for that efficiency on each problem size was found. The table below shows the
+findings for some of the efficiencys tested.
+
+\begin{center}
+\begin{tabular}{ |c|c|c| }
+ \hline
+  Problem size & 0.6 precision & 0.7 precision \\
+  300 & 7.1 & 5\\
+  500 & 11 & 8\\
+  700 & 14.2 & 10.5\\
+  900 & 16 & 12.1\\
+ \hline
+\end{tabular}
+\end{center}
+
+As shown in Figure \ref{fig:Isoefficiency} the relationship between the number of threads
+and the problem size is very close to linear as suggested by the calculations done
+above. In this example the 
+
+\begin{figure}[H]
+ \centering
+ \begin{tikzpicture}
+ \begin{axis}[
+     xlabel={Problem Size},
+     ylabel=Threads,
+     ]
+   \addplot table [x=size,y=six] {Isoefficiency/100};
+   \addplot table [x=size,y=seven] {Isoefficiency/100};
+   \addlegendentry{0.6 precision}
+   \addlegendentry{0.7 precision}
+ \end{axis}
+ \end{tikzpicture}
+ \caption{}
+ \label{fig:Isoefficiency}
+\end{figure}\\~\\
+
+\subsubsection{Conclusion}
+
+I conclusion the program
 
 
 \end{document}
